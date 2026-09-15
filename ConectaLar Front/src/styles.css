@@ -638,6 +638,30 @@ footer {
   height: 44px;
   color: var(--green);
 }
+.property-state {
+  min-height: clamp(360px, 52vh, 560px);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  text-align: center;
+}
+.property-state h1 {
+  margin: 0;
+  font-size: clamp(32px, 4vw, 46px);
+}
+.property-state p:not(.section-tag) {
+  max-width: 470px;
+  margin: 0;
+  color: #637777;
+  line-height: 1.55;
+}
+.property-state a {
+  margin-top: 10px;
+  color: var(--green);
+  font-weight: 700;
+}
 .detail {
   padding-top: 32px;
   padding-bottom: 90px;
@@ -1168,6 +1192,17 @@ footer {
   }
   .foot > div:first-child {
     grid-column: 1/-1;
+  }
+  .property-state {
+    min-height: calc(100svh - 67px - 315px);
+    min-height: 330px;
+    padding-inline: 24px;
+  }
+  .property-state h1 {
+    font-size: 34px;
+  }
+  .property-state p:not(.section-tag) {
+    font-size: 15px;
   }
 }
 .guidelines-page {

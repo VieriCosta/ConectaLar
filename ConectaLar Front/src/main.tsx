@@ -707,7 +707,13 @@ function ReportProperty({ propertyId }: { propertyId: string }) {
     </div>
   );
 }
-function DetailPage({ properties }: { properties: Property[] }) {
+function DetailPage({
+  properties,
+  loadingProperties,
+}: {
+  properties: Property[];
+  loadingProperties: boolean;
+}) {
   const { id } = useParams();
   const { user } = useAuth();
   const p = properties.find((x) => x.id === id);
@@ -825,10 +831,20 @@ function DetailPage({ properties }: { properties: Property[] }) {
       setLoadingContact(false);
     }
   }
+  if (!p && loadingProperties)
+    return (
+      <main className="wrap property-state" aria-live="polite">
+        <p className="section-tag">CARREGANDO</p>
+        <h1>Buscando imóvel...</h1>
+        <p>Aguarde um instante enquanto consultamos os dados.</p>
+      </main>
+    );
   if (!p)
     return (
-      <main className="wrap empty">
+      <main className="wrap property-state empty">
+        <p className="section-tag">ANÚNCIO INDISPONÍVEL</p>
         <h1>Imóvel não encontrado</h1>
+        <p>Este anúncio pode ter sido removido, pausado ou ainda estar em análise.</p>
         <Link to="/alugar">Voltar à busca</Link>
       </main>
     );
@@ -1283,13 +1299,15 @@ function AdvertisePage() {
 }
 function AppContent() {
   const [properties, setProperties] = useState<Property[]>([]);
+  const [loadingProperties, setLoadingProperties] = useState(true);
   useEffect(() => {
     fetch('/api/properties')
       .then((response) => (response.ok ? response.json() : Promise.reject()))
       .then((data: { properties?: Property[] }) => {
-        if (data.properties?.length) setProperties(data.properties);
+        setProperties(data.properties ?? []);
       })
-      .catch(() => undefined);
+      .catch(() => setProperties([]))
+      .finally(() => setLoadingProperties(false));
   }, []);
   const { pathname } = useLocation();
   const isAuthenticationPage =
@@ -1308,7 +1326,7 @@ function AppContent() {
           />
           <Route
             path="/imovel/:id"
-            element={<DetailPage properties={properties} />}
+            element={<DetailPage properties={properties} loadingProperties={loadingProperties} />}
           />
           <Route
             path="/anunciar"
