@@ -1,0 +1,22 @@
+export type Property = {
+  id: string;
+  title: string;
+  type: string;
+  city: string;
+  neighborhood: string;
+  address: string;
+  price: number;
+  condominium?: number;
+  iptu?: number;
+  bedrooms: number;
+  bathrooms: number;
+  parkingSpaces: number;
+  area: number;
+  description: string;
+  images: string[];
+  acceptsPets: boolean;
+  furnished: boolean;
+  status: 'active' | 'paused';
+  ownerName: string;
+  ownerPhone: string;
+};

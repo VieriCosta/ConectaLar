@@ -1,0 +1,24 @@
+{
+  "name": "conectalar-back",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node --watch src/server.js",
+    "start": "node src/server.js",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "latest",
+    "cors": "latest",
+    "dotenv": "latest",
+    "express": "latest",
+    "express-rate-limit": "latest",
+    "helmet": "latest",
+    "pg": "latest",
+    "zod": "latest"
+  },
+  "devDependencies": {
+    "prettier": "latest"
+  }
+}

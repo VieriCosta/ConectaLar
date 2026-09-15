@@ -1,0 +1,6 @@
+**/node_modules/
+**/dist/
+**/coverage/
+**/*.min.*
+ConectaLar Front/vite.config.js
+ConectaLar Front/vite.config.d.ts
