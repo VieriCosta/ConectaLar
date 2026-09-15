@@ -10,7 +10,7 @@ type Listing = {
   city: string;
   neighborhood: string;
   price: number;
-  status: 'active' | 'paused';
+  status: 'active' | 'paused' | 'pending' | 'removed';
   created_at: string;
 };
 type Interest = {
@@ -72,6 +72,7 @@ export function MyListingsPage() {
     return <main className="my-listings wrap">Carregando anúncios...</main>;
   if (!user) return <Navigate to="/login" replace />;
   async function changeStatus(listing: Listing) {
+    if (listing.status !== 'active' && listing.status !== 'paused') return;
     const status = listing.status === 'active' ? 'paused' : 'active';
     const { error } = await supabase
       .from('properties')
@@ -144,7 +145,13 @@ export function MyListingsPage() {
             <article key={listing.id}>
               <div>
                 <span className={`listing-status ${listing.status}`}>
-                  {listing.status === 'active' ? 'Ativo' : 'Pausado'}
+                  {listing.status === 'active'
+                    ? 'Ativo'
+                    : listing.status === 'paused'
+                      ? 'Pausado'
+                      : listing.status === 'pending'
+                        ? 'Em revisão'
+                        : 'Removido'}
                 </span>
                 <h2>{listing.title}</h2>
                 <p>
@@ -153,20 +160,20 @@ export function MyListingsPage() {
                 </p>
               </div>
               <div className="listing-actions">
-                <Link to={`/imovel/${listing.id}`} aria-label="Ver anúncio">
-                  <Eye size={17} />
-                </Link>
-                <button
-                  type="button"
-                  onClick={() => changeStatus(listing)}
-                  aria-label="Alterar status"
-                >
-                  {listing.status === 'active' ? (
-                    <Pause size={17} />
-                  ) : (
-                    <Play size={17} />
-                  )}
-                </button>
+                {listing.status !== 'pending' && listing.status !== 'removed' && (
+                  <>
+                    <Link to={`/imovel/${listing.id}`} aria-label="Ver anúncio">
+                      <Eye size={17} />
+                    </Link>
+                    <button
+                      type="button"
+                      onClick={() => changeStatus(listing)}
+                      aria-label="Alterar status"
+                    >
+                      {listing.status === 'active' ? <Pause size={17} /> : <Play size={17} />}
+                    </button>
+                  </>
+                )}
                 <button
                   className="delete-listing"
                   type="button"

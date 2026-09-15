@@ -714,6 +714,7 @@ function DetailPage({ properties }: { properties: Property[] }) {
   const [sent, setSent] = useState(false);
   const [contactMessage, setContactMessage] = useState('');
   const [sendingInterest, setSendingInterest] = useState(false);
+  const [loadingContact, setLoadingContact] = useState(false);
   const [reviews, setReviews] = useState<PropertyReview[]>([]);
   const [hasConfirmedRental, setHasConfirmedRental] = useState(false);
   const [rentalAgreementId, setRentalAgreementId] = useState<string | null>(null);
@@ -800,6 +801,29 @@ function DetailPage({ properties }: { properties: Property[] }) {
     setReviewMessage('');
     setReviewStatus('Avaliação enviada. Obrigado por compartilhar sua experiência!');
     if (p) getPropertyReviews(p.id).then(setReviews).catch(() => undefined);
+  }
+  async function openWhatsApp() {
+    if (!user) {
+      setContactMessage('Entre na sua conta e envie seu interesse para solicitar o contato.');
+      return;
+    }
+    if (!p) return;
+    setLoadingContact(true);
+    setContactMessage('');
+    const { data } = await supabase.auth.getSession();
+    try {
+      const response = await fetch(`/api/properties/${p.id}/contact`, {
+        headers: { Authorization: `Bearer ${data.session?.access_token ?? ''}` },
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error ?? 'Não foi possível liberar o contato.');
+      const phone = String(result.phone).replace(/\D/g, '');
+      window.open(`https://wa.me/55${phone.replace(/^55/, '')}?text=${encodeURIComponent(`Olá, tenho interesse em ${p.title}`)}`, '_blank', 'noopener,noreferrer');
+    } catch (error) {
+      setContactMessage(error instanceof Error ? error.message : 'Não foi possível liberar o contato.');
+    } finally {
+      setLoadingContact(false);
+    }
   }
   if (!p)
     return (
@@ -974,22 +998,16 @@ function DetailPage({ properties }: { properties: Property[] }) {
             Tenho interesse
           </button>
           <ReportProperty propertyId={p.id} />
-          <a
-            target="_blank"
-            rel="noreferrer"
-            href={
-              'https://wa.me/5585999990000?text=Olá, tenho interesse em ' +
-              encodeURIComponent(p.title)
-            }
-          >
-            Falar pelo WhatsApp
-          </a>
+          <button type="button" className="whatsapp-contact" onClick={openWhatsApp} disabled={loadingContact}>
+            {loadingContact ? 'Verificando contato...' : 'Falar pelo WhatsApp'}
+          </button>
+          {contactMessage && <small className="form-message contact-message">{contactMessage}</small>}
         </aside>
       </div>
     </main>
   );
 }
-function AdvertisePage({ onAdd }: { onAdd: (p: Property) => void }) {
+function AdvertisePage() {
   const [done, setDone] = useState(false);
   const [message, setMessage] = useState('');
   const [uploading, setUploading] = useState(false);
@@ -1075,7 +1093,6 @@ function AdvertisePage({ onAdd }: { onAdd: (p: Property) => void }) {
       setMessage(result.error ?? 'Não foi possível publicar o anúncio.');
       return;
     }
-    onAdd(result.property as Property);
     setUploading(false);
     setDone(true);
     e.currentTarget.reset();
@@ -1085,8 +1102,8 @@ function AdvertisePage({ onAdd }: { onAdd: (p: Property) => void }) {
       <main className="wrap success-page">
         <Check size={42} />
         <h1>Anúncio criado com sucesso!</h1>
-        <p>Seu imóvel foi salvo no banco e já está visível na busca.</p>
-        <Link to="/alugar">Ver meus anúncios</Link>
+        <p>Seu imóvel foi salvo no banco e será publicado após a análise da equipe.</p>
+        <Link to="/meus-anuncios">Acompanhar meus anúncios</Link>
       </main>
     );
   return (
@@ -1296,7 +1313,7 @@ function AppContent() {
           <Route
             path="/anunciar"
             element={
-              <AdvertisePage onAdd={(p) => setProperties((x) => [p, ...x])} />
+              <AdvertisePage />
             }
           />
           <Route path="/login" element={<LoginPage />} />

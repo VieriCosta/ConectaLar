@@ -16,7 +16,6 @@ export type Property = {
   images: string[];
   acceptsPets: boolean;
   furnished: boolean;
-  status: 'active' | 'paused';
+  status: 'active' | 'paused' | 'pending' | 'removed';
   ownerName: string;
-  ownerPhone: string;
 };

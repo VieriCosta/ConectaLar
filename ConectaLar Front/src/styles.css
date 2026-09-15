@@ -867,6 +867,20 @@ footer {
   background: var(--coral);
   color: white;
 }
+.price-box .whatsapp-contact {
+  background: #fff;
+  color: var(--green);
+  border: 1px solid var(--green);
+}
+.price-box .whatsapp-contact:disabled {
+  opacity: 0.65;
+  cursor: wait;
+}
+.contact-message {
+  margin-top: 10px;
+  color: #546b6c;
+  line-height: 1.45;
+}
 .price-box a {
   border: 1px solid var(--green);
   color: var(--green);

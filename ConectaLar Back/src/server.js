@@ -150,7 +150,8 @@ app.post(
         description: input.data.description,
         accepts_pets: input.data.acceptsPets,
         furnished: input.data.furnished,
-        status: 'active',
+        // A service_role ignora RLS; portanto, a moderação precisa ser forçada aqui.
+        status: 'pending',
     images: input.data.images,
       })
       .select()
@@ -179,7 +180,6 @@ app.post(
         furnished: data.furnished,
         status: data.status,
         ownerName: profile.full_name,
-        ownerPhone: profile.phone ?? '',
       },
     });
   },
@@ -202,7 +202,7 @@ app.get('/api/properties', async (_, res) => {
   const { data: owners } = ownerIds.length
     ? await supabaseAdmin
         .from('profiles')
-        .select('id, full_name, phone')
+        .select('id, full_name')
         .in('id', ownerIds)
     : { data: [] };
   const ownerById = new Map((owners ?? []).map((owner) => [owner.id, owner]));
@@ -228,12 +228,44 @@ app.get('/api/properties', async (_, res) => {
         furnished: property.furnished,
         status: property.status,
         ownerName: owner?.full_name ?? 'Anunciante',
-        ownerPhone: owner?.phone ?? '',
       };
     }),
   });
 });
 const propertyIdSchema = z.string().uuid();
+app.get('/api/properties/:propertyId/contact', requireUser, async (req, res) => {
+  if (!propertyIdSchema.safeParse(req.params.propertyId).success)
+    return res.status(400).json({ error: 'Imóvel inválido.' });
+  const { data: property } = await supabaseAdmin
+    .from('properties')
+    .select('owner_id')
+    .eq('id', req.params.propertyId)
+    .maybeSingle();
+  if (!property) return res.status(404).json({ error: 'Imóvel não encontrado.' });
+
+  const isOwner = property.owner_id === req.user.id;
+  const { data: approvedInterest } = isOwner
+    ? { data: { id: 'owner' } }
+    : await supabaseAdmin
+        .from('interests')
+        .select('id')
+        .eq('property_id', req.params.propertyId)
+        .eq('renter_id', req.user.id)
+        .eq('status', 'approved')
+        .maybeSingle();
+  if (!approvedInterest)
+    return res.status(403).json({
+      error: 'O contato será liberado quando seu interesse for aprovado pelo anunciante.',
+    });
+  const { data: owner } = await supabaseAdmin
+    .from('profiles')
+    .select('phone')
+    .eq('id', property.owner_id)
+    .maybeSingle();
+  if (!owner?.phone)
+    return res.status(404).json({ error: 'Telefone do anunciante não informado.' });
+  res.json({ phone: owner.phone });
+});
 app.get('/api/properties/:propertyId/reviews', async (req, res) => {
   if (!propertyIdSchema.safeParse(req.params.propertyId).success)
     return res.json({ reviews: [] });
@@ -476,6 +508,26 @@ app.post(
 const leadStatusSchema = z
   .object({ status: z.enum(['new', 'contacted', 'visit_scheduled']) })
   .strict();
+const propertyModerationSchema = z
+  .object({ status: z.enum(['active', 'paused', 'removed']) })
+  .strict();
+app.post(
+  '/api/admin/properties/:id/status',
+  requireUser,
+  requireAdmin,
+  async (req, res) => {
+    const input = propertyModerationSchema.safeParse(req.body);
+    if (!input.success || !propertyIdSchema.safeParse(req.params.id).success)
+      return res.status(400).json({ error: 'Dados inválidos.' });
+    const { error } = await supabaseAdmin
+      .from('properties')
+      .update({ status: input.data.status })
+      .eq('id', req.params.id);
+    if (error)
+      return res.status(400).json({ error: 'Não foi possível atualizar a moderação.' });
+    res.json({ success: true });
+  },
+);
 app.post(
   '/api/admin/leads/:id/status',
   requireUser,
