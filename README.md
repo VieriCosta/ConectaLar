@@ -4,7 +4,7 @@ Plataforma de anúncios de aluguel de imóveis. O projeto reúne uma interface R
 
 ## Funcionalidades
 
-- Busca e filtros de imóveis cadastrados no banco.
+- Busca com sugestões de localização, filtros, modos de visualização e comparação de até três imóveis.
 - Cadastro de anúncios com fotos, máscara de telefone e validação dos campos.
 - Autenticação, perfil e favoritos.
 - Painel do anunciante para pausar, excluir e gerenciar anúncios.
@@ -45,6 +45,8 @@ copy "ConectaLar Back\\.env.example" "ConectaLar Back\\.env"
 ```
 
 Preencha as variáveis conforme os exemplos. A chave `SUPABASE_SERVICE_ROLE_KEY` é exclusiva do backend e nunca deve ser usada no frontend.
+
+No frontend, `VITE_API_PROXY_TARGET` aponta para a API local. Para visualizar a interface em desenvolvimento sem conexão com o Supabase, defina `VITE_DEMO_MODE=true` em `ConectaLar Front/.env`. A prévia usa imóveis ilustrativos e não envia formulários; volte para `false` para usar os dados reais. O modo de demonstração nunca é incluído na compilação de produção.
 
 No painel do Supabase, execute as migrations de `supabase/migrations` em ordem cronológica. Para o fluxo de contratos e avaliações, execute também `20260919_interest_contract_flow.sql`.
 

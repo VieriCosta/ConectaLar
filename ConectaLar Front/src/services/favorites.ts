@@ -1,4 +1,5 @@
 import { supabase } from './supabase';
+import { demoMode } from '../config';
 
 const guestFavoritesKey = 'conectalar-guest-favorites';
 
@@ -20,6 +21,7 @@ function setGuestFavoriteIds(favorites: string[]) {
 }
 
 export async function getFavoriteIds() {
+  if (demoMode) return getGuestFavoriteIds();
   const { data: sessionData } = await supabase.auth.getSession();
   const userId = sessionData.session?.user.id;
   if (!userId) return getGuestFavoriteIds();
@@ -32,6 +34,15 @@ export async function getFavoriteIds() {
 }
 
 export async function toggleFavorite(propertyId: string, isFavorite: boolean) {
+  if (demoMode) {
+    const favorites = getGuestFavoriteIds();
+    setGuestFavoriteIds(
+      isFavorite
+        ? favorites.filter((id) => id !== propertyId)
+        : [...new Set([...favorites, propertyId])],
+    );
+    return;
+  }
   const { data: sessionData } = await supabase.auth.getSession();
   const userId = sessionData.session?.user.id;
   if (!userId) {

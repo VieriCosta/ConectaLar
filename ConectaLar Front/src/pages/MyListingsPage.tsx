@@ -57,15 +57,23 @@ export function MyListingsPage() {
     const response = await fetch('/api/owner/interests', {
       headers: { Authorization: `Bearer ${data.session?.access_token ?? ''}` },
     });
-    if (!response.ok) throw new Error('Não foi possível carregar os interesses.');
-    const result = (await response.json()) as { interests: Interest[]; agreements: Agreement[] };
+    if (!response.ok)
+      throw new Error('Não foi possível carregar os interesses.');
+    const result = (await response.json()) as {
+      interests: Interest[];
+      agreements: Agreement[];
+    };
     setInterests(result.interests);
     setAgreements(result.agreements);
   }
   useEffect(() => {
     if (!user) return;
     loadContractData().catch((error) =>
-      setMessage(error instanceof Error ? error.message : 'Não foi possível carregar os interesses.'),
+      setMessage(
+        error instanceof Error
+          ? error.message
+          : 'Não foi possível carregar os interesses.',
+      ),
     );
   }, [user]);
   if (loading)
@@ -107,20 +115,29 @@ export function MyListingsPage() {
       headers: { Authorization: `Bearer ${data.session?.access_token ?? ''}` },
     });
     const result = await response.json();
-    if (!response.ok) setMessage(result.error ?? 'Não foi possível aprovar o interesse.');
+    if (!response.ok)
+      setMessage(result.error ?? 'Não foi possível aprovar o interesse.');
     else {
-      setMessage('Interesse aprovado e contrato ativo criado. Conclua o contrato quando a locação terminar.');
+      setMessage(
+        'Interesse aprovado e contrato ativo criado. Conclua o contrato quando a locação terminar.',
+      );
       loadContractData().catch(() => undefined);
     }
   }
   async function completeAgreement(agreement: Agreement) {
     const { data } = await supabase.auth.getSession();
-    const response = await fetch(`/api/rental-agreements/${agreement.id}/complete`, {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${data.session?.access_token ?? ''}` },
-    });
+    const response = await fetch(
+      `/api/rental-agreements/${agreement.id}/complete`,
+      {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${data.session?.access_token ?? ''}`,
+        },
+      },
+    );
     const result = await response.json();
-    if (!response.ok) setMessage(result.error ?? 'Não foi possível concluir o contrato.');
+    if (!response.ok)
+      setMessage(result.error ?? 'Não foi possível concluir o contrato.');
     else {
       setMessage('Contrato concluído. O locatário já pode avaliar o imóvel.');
       loadContractData().catch(() => undefined);
@@ -160,20 +177,28 @@ export function MyListingsPage() {
                 </p>
               </div>
               <div className="listing-actions">
-                {listing.status !== 'pending' && listing.status !== 'removed' && (
-                  <>
-                    <Link to={`/imovel/${listing.id}`} aria-label="Ver anúncio">
-                      <Eye size={17} />
-                    </Link>
-                    <button
-                      type="button"
-                      onClick={() => changeStatus(listing)}
-                      aria-label="Alterar status"
-                    >
-                      {listing.status === 'active' ? <Pause size={17} /> : <Play size={17} />}
-                    </button>
-                  </>
-                )}
+                {listing.status !== 'pending' &&
+                  listing.status !== 'removed' && (
+                    <>
+                      <Link
+                        to={`/imovel/${listing.id}`}
+                        aria-label="Ver anúncio"
+                      >
+                        <Eye size={17} />
+                      </Link>
+                      <button
+                        type="button"
+                        onClick={() => changeStatus(listing)}
+                        aria-label="Alterar status"
+                      >
+                        {listing.status === 'active' ? (
+                          <Pause size={17} />
+                        ) : (
+                          <Play size={17} />
+                        )}
+                      </button>
+                    </>
+                  )}
                 <button
                   className="delete-listing"
                   type="button"
@@ -197,35 +222,61 @@ export function MyListingsPage() {
       <section className="listing-contracts" aria-labelledby="interests-title">
         <p className="section-tag">LOCAÇÕES</p>
         <h2 id="interests-title">Interesses recebidos</h2>
-        {interests.filter((interest) => interest.status === 'pending').length ? (
+        {interests.filter((interest) => interest.status === 'pending')
+          .length ? (
           <div className="listing-manager">
-            {interests.filter((interest) => interest.status === 'pending').map((interest) => (
-              <article key={interest.id}>
-                <div>
-                  <h3>{interest.propertyTitle}</h3>
-                  <p><b>{interest.renterName}</b> · {interest.renterEmail}</p>
-                  <p>{interest.message}</p>
-                </div>
-                <div className="listing-actions">
-                  <button type="button" onClick={() => approveInterest(interest)} title="Aprovar interesse">
-                    <Check size={17} /> Aprovar
-                  </button>
-                </div>
-              </article>
-            ))}
+            {interests
+              .filter((interest) => interest.status === 'pending')
+              .map((interest) => (
+                <article key={interest.id}>
+                  <div>
+                    <h3>{interest.propertyTitle}</h3>
+                    <p>
+                      <b>{interest.renterName}</b> · {interest.renterEmail}
+                    </p>
+                    <p>{interest.message}</p>
+                  </div>
+                  <div className="listing-actions">
+                    <button
+                      type="button"
+                      onClick={() => approveInterest(interest)}
+                      title="Aprovar interesse"
+                    >
+                      <Check size={17} /> Aprovar
+                    </button>
+                  </div>
+                </article>
+              ))}
           </div>
-        ) : <p className="empty-copy">Nenhum interesse pendente no momento.</p>}
+        ) : (
+          <p className="empty-copy">Nenhum interesse pendente no momento.</p>
+        )}
         <h2>Contratos ativos</h2>
-        {agreements.filter((agreement) => agreement.status === 'active').length ? (
+        {agreements.filter((agreement) => agreement.status === 'active')
+          .length ? (
           <div className="listing-manager">
-            {agreements.filter((agreement) => agreement.status === 'active').map((agreement) => (
-              <article key={agreement.id}>
-                <div><h3>{agreement.propertyTitle}</h3><p>Locatário: {agreement.renterName}</p></div>
-                <div className="listing-actions"><button type="button" onClick={() => completeAgreement(agreement)}>Concluir locação</button></div>
-              </article>
-            ))}
+            {agreements
+              .filter((agreement) => agreement.status === 'active')
+              .map((agreement) => (
+                <article key={agreement.id}>
+                  <div>
+                    <h3>{agreement.propertyTitle}</h3>
+                    <p>Locatário: {agreement.renterName}</p>
+                  </div>
+                  <div className="listing-actions">
+                    <button
+                      type="button"
+                      onClick={() => completeAgreement(agreement)}
+                    >
+                      Concluir locação
+                    </button>
+                  </div>
+                </article>
+              ))}
           </div>
-        ) : <p className="empty-copy">Nenhum contrato ativo.</p>}
+        ) : (
+          <p className="empty-copy">Nenhum contrato ativo.</p>
+        )}
       </section>
     </main>
   );

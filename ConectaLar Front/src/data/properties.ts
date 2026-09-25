@@ -1,11 +1,13 @@
 import type { Property } from '../types/property';
 
 export const propertyPhotos = [
-  'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80',
-  'https://images.unsplash.com/photo-1600566753086-00f18fb6b3ea?auto=format&fit=crop&w=1200&q=80',
-  'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1200&q=80',
-  'https://images.unsplash.com/photo-1613490493576-7fde63acd811?auto=format&fit=crop&w=1200&q=80',
+  '/images/apartment.png',
+  '/images/house.png',
+  '/images/studio.png',
+  '/images/hero-home.png',
 ];
+
+export const heroPhoto = '/images/hero-home.png';
 
 const rawProperties = [
   [
@@ -146,7 +148,6 @@ export const initialProperties: Property[] = rawProperties.map(
     furnished: item[11],
     status: 'active',
     ownerName: owners[index % owners.length],
-    ownerPhone: '(85) 99999-0000',
     condominium: index === 0 ? 680 : undefined,
     images: [
       propertyPhotos[index % propertyPhotos.length],

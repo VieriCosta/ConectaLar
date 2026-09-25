@@ -1,12 +1,17 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ChevronDown, Home, Menu, UserRound } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, NavLink, useLocation } from 'react-router-dom';
 import { useAuth } from '../../services/AuthContext';
 
 export function Header() {
   const [isOpen, setIsOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
+  const { pathname } = useLocation();
   const { user, loading } = useAuth();
+  useEffect(() => {
+    setIsOpen(false);
+    setProfileOpen(false);
+  }, [pathname]);
   const firstName = String(
     user?.user_metadata?.full_name ?? user?.email ?? 'Conta',
   ).split(' ')[0];
@@ -22,13 +27,19 @@ export function Header() {
       <button
         className="menu"
         onClick={() => setIsOpen(!isOpen)}
-        aria-label="Abrir menu"
+        aria-label={isOpen ? 'Fechar menu' : 'Abrir menu'}
+        aria-expanded={isOpen}
+        aria-controls="site-navigation"
       >
         <Menu />
       </button>
-      <nav className={isOpen ? 'show' : ''}>
-        <Link to="/alugar">Quero alugar</Link>
-        <Link to="/anunciar">Quero anunciar</Link>
+      <nav
+        id="site-navigation"
+        className={isOpen ? 'show' : ''}
+        aria-label="Navegação principal"
+      >
+        <NavLink to="/alugar">Quero alugar</NavLink>
+        <NavLink to="/anunciar">Quero anunciar</NavLink>
         <a href="/#como-funciona">Como funciona</a>
         {!loading &&
           (user ? (

@@ -7,6 +7,7 @@ import {
 } from 'react';
 import type { Session, User } from '@supabase/supabase-js';
 import { supabase } from './supabase';
+import { demoMode } from '../config';
 
 type AuthContextValue = {
   session: Session | null;
@@ -22,6 +23,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (demoMode) {
+      setLoading(false);
+      return;
+    }
     let active = true;
     supabase.auth.getSession().then(({ data }) => {
       if (active) {

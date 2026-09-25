@@ -1,33 +1,32 @@
 import { Home } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 export function Footer() {
   return (
     <footer>
       <div className="wrap foot">
         <div>
-          <a className="brand" href="/">
+          <Link className="brand" to="/">
             <span>
               <Home size={20} />
             </span>
             ConectaLar
-          </a>
+          </Link>
           <p>Conexões que viram lar.</p>
         </div>
         <div>
           <b>Encontre</b>
-          <a href="/alugar">Quero alugar</a>
-          <a href="/anunciar">Quero anunciar</a>
+          <Link to="/alugar">Quero alugar</Link>
+          <Link to="/anunciar">Quero anunciar</Link>
         </div>
         <div>
-          <b>Contato</b>
-          <a href="mailto:ola@conectalar.com.br">ola@conectalar.com.br</a>
-          <span>(85) 99999-0000</span>
-          <a href="/diretrizes">Diretrizes e regras</a>
-          <a href="/privacidade">Política de privacidade</a>
+          <b>Informações</b>
+          <Link to="/diretrizes">Diretrizes e regras</Link>
+          <Link to="/privacidade">Política de privacidade</Link>
         </div>
       </div>
       <p className="copyright">
-        © 2026 ConectaLar. Todos os direitos reservados.
+        © {new Date().getFullYear()} ConectaLar. Todos os direitos reservados.
       </p>
     </footer>
   );
